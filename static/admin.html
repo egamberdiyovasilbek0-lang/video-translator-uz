@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin panel - AI Video Tarjimon</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><i class="fa-solid fa-globe"></i> AI Video Tarjimon</a>
+  <a class="btn btn-sm" href="/"><i class="fa-solid fa-arrow-left"></i> Asosiy sahifa</a>
+</header>
+
+<main>
+  <section class="card" id="denied" hidden>
+    <h2>Ruxsat yo'q</h2>
+    <p class="note">Bu sahifa faqat adminlar uchun. Asosiy sahifada admin Google hisobi bilan kiring, so'ng qaytib keling.</p>
+  </section>
+
+  <div id="panel" hidden>
+    <section class="card">
+      <h2>Umumiy ko'rsatkichlar</h2>
+      <div class="stats">
+        <div class="stat"><b id="sUsers">0</b><span>Foydalanuvchilar</span></div>
+        <div class="stat"><b id="sOk">0</b><span>Muvaffaqiyatli tarjimalar</span></div>
+        <div class="stat"><b id="sToday">0</b><span>Bugungi tarjimalar</span></div>
+        <div class="stat"><b id="sActive">0</b><span>Hozir ishlayotgan</span></div>
+      </div>
+      <p class="note" id="cfgLine"></p>
+      <p class="note">Eslatma: bepul Render serverida ma'lumotlar server qayta ishga tushganda tozalanadi.</p>
+    </section>
+
+    <section class="card">
+      <h2>Foydalanuvchilar</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Email</th><th>Ism</th><th>Oxirgi kirish</th><th>Tarjimalar</th><th></th></tr></thead>
+        <tbody id="users"></tbody>
+      </table></div>
+    </section>
+
+    <section class="card">
+      <h2>So'nggi tarjimalar</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Vaqt (UTC)</th><th>Foydalanuvchi</th><th>Video</th><th>Til</th><th>Usul</th><th>Holat</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table></div>
+    </section>
+  </div>
+</main>
+
+<footer><p>&copy; 2026 Admin panel</p></footer>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  async function api(path, opts = {}) {
+    const r = await fetch(path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
+    let d = null; try { d = await r.json(); } catch (e) {}
+    if (!r.ok) { const e = new Error((d && d.error) || 'Xato ' + r.status); e.status = r.status; throw e; }
+    return d;
+  }
+  function td(text, cls) { const c = document.createElement('td'); c.textContent = text == null ? '' : text; if (cls) c.className = cls; return c; }
+
+  async function load() {
+    let s;
+    try { s = await api('/api/admin/stats'); }
+    catch (e) { $('#denied').hidden = false; $('#panel').hidden = true; return; }
+    $('#denied').hidden = true; $('#panel').hidden = false;
+    $('#sUsers').textContent = s.users_total;
+    $('#sOk').textContent = s.translations_ok;
+    $('#sToday').textContent = s.translations_today;
+    $('#sActive').textContent = s.active_jobs;
+    const c = s.config;
+    $('#cfgLine').textContent = `Google kirish: ${c.google ? 'sozlangan' : 'SOZLANMAGAN'} | STT (Groq): ${c.stt ? 'yoqilgan' : "o'chiq"} | YouTube cookie: ${c.cookies ? 'bor' : "yo'q"} | Kunlik limit: ${c.daily_limit} | Adminlar soni: ${c.admins}`;
+
+    const ub = $('#users'); ub.textContent = '';
+    s.users.forEach((u) => {
+      const tr = document.createElement('tr');
+      tr.append(td(u.email), td(u.name), td(u.last_login), td(u.ok));
+      const act = document.createElement('td');
+      const b = document.createElement('button');
+      b.className = 'btn btn-sm';
+      b.textContent = u.blocked ? 'Blokdan chiqarish' : 'Bloklash';
+      b.onclick = async () => {
+        try { await api('/api/admin/block', { method: 'POST', body: JSON.stringify({ email: u.email, blocked: !u.blocked }) }); load(); }
+        catch (e) { alert(e.message); }
+      };
+      act.appendChild(b); tr.appendChild(act); ub.appendChild(tr);
+    });
+
+    const rb = $('#recent'); rb.textContent = '';
+    s.recent.forEach((r) => {
+      const tr = document.createElement('tr');
+      const st = r.status === 1 ? 'OK' : r.status === -1 ? ('Xato: ' + (r.error || '')) : 'jarayonda';
+      tr.append(td(r.created_at), td(r.email), td(r.title || r.url), td(r.src_lang), td(r.method), td(st, r.status === 1 ? 'ok' : r.status === -1 ? 'bad' : ''));
+      rb.appendChild(tr);
+    });
+  }
+  load();
+})();
+</script>
+</body>
+</html>
