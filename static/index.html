@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Video Tarjimon - O'zbekcha ovozli tarjima</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/"><i class="fa-solid fa-globe"></i> AI Video Tarjimon (O'zbekcha)</a>
+  <div class="auth">
+    <div id="gbtn"></div>
+    <div class="userbox" id="userbox" hidden>
+      <img id="avatar" alt="" referrerpolicy="no-referrer">
+      <span class="uname" id="uname"></span>
+      <span class="badge" id="adminBadge" hidden>ADMIN</span>
+      <a class="btn btn-sm" id="adminLink" href="/admin" hidden><i class="fa-solid fa-gauge"></i> Panel</a>
+      <button class="btn btn-sm" id="logout"><i class="fa-solid fa-right-from-bracket"></i> Chiqish</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="formCard">
+    <h2>Video tarjima sozlamalari</h2>
+
+    <div class="form-group">
+      <label for="url">YouTube yoki VK video havolasi:</label>
+      <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=...  yoki  https://vk.com/video..." inputmode="url" autocomplete="off">
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label for="lang">Asl til (original):</label>
+        <select id="lang">
+          <option value="auto" selected>Avto aniqlash</option>
+          <option value="zh">Xitoy (Mandarin)</option>
+          <option value="ja">Yapon</option>
+          <option value="ru">Rus</option>
+          <option value="en">Ingliz</option>
+          <option value="de">Nemis</option>
+          <option value="fr">Fransuz</option>
+          <option value="ar">Arab</option>
+          <option value="tr">Turk</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="voice">O'zbek ovozi:</label>
+        <select id="voice">
+          <option value="female" selected>Ayol ovozi (Madina)</option>
+          <option value="male">Erkak ovozi (Sardor)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="quality">Video sifati (xohlangan):</label>
+        <select id="quality">
+          <option value="0">Eng yuqori (avto)</option>
+          <option value="144">144p</option>
+          <option value="240">240p</option>
+          <option value="360">360p</option>
+          <option value="480">480p</option>
+          <option value="720">720p (HD)</option>
+          <option value="1080">1080p (Full HD)</option>
+          <option value="1440">1440p (2K)</option>
+          <option value="2160">2160p (4K)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="go"><i class="fa-solid fa-wand-magic-sparkles"></i> Tarjima qilish va ovoz berish</button>
+    <p class="note" id="quota"></p>
+
+    <div class="progress" id="progress" hidden>
+      <div class="pbar"><i id="pfill"></i></div>
+      <p id="pstep"></p>
+    </div>
+    <p class="err" id="err" hidden></p>
+  </section>
+
+  <section id="playerSection" hidden>
+    <h3 id="vtitle"></h3>
+    <div class="meta" id="meta"></div>
+
+    <div class="stage" id="stage">
+      <button class="ibtn toolsToggle" id="toolsToggle" title="Sozlamalar"><i class="fa-solid fa-sliders"></i></button>
+      <div class="viewport">
+        <div id="media"></div>
+        <div class="sub" id="sub"></div>
+      </div>
+
+      <div class="transport" id="transport" hidden>
+        <button class="ibtn" id="playBtn" title="Ijro / pauza"><i class="fa-solid fa-play"></i></button>
+        <input type="range" id="seek" min="0" max="1000" value="0">
+        <span class="time" id="timeTxt">0:00 / 0:00</span>
+      </div>
+
+      <div class="tools" id="tools">
+        <div class="grp"><i class="fa-solid fa-microphone-lines"></i>
+          <select id="voice2" title="O'zbek ovozi">
+            <option value="female">Ayol</option>
+            <option value="male">Erkak</option>
+          </select>
+        </div>
+        <div class="grp" title="O'zbek ovozi balandligi"><i class="fa-solid fa-volume-high"></i>
+          <input type="range" id="uzVol" min="0" max="100" value="100">
+        </div>
+        <div class="grp" title="Asl ovoz balandligi"><i class="fa-solid fa-music"></i>
+          <input type="range" id="origVol" min="0" max="100" value="8">
+        </div>
+        <div class="grp" id="qualGrp" hidden><i class="fa-solid fa-gear"></i>
+          <select id="qual" title="Sifat"></select>
+        </div>
+        <button class="ibtn" id="ccBtn" title="O'zbekcha subtitr"><i class="fa-solid fa-closed-captioning"></i></button>
+        <span class="spacer"></span>
+        <button class="ibtn" id="fsBtn" title="To'liq ekran (yonbosh)"><i class="fa-solid fa-expand"></i></button>
+      </div>
+    </div>
+    <p class="note" id="modeHint"></p>
+  </section>
+
+  <audio id="dubAudio" preload="auto" playsinline></audio>
+</main>
+
+<footer>
+  <p>&copy; 2026 Barcha huquqlar himoyalangan.</p>
+  <div class="admin-info" id="adminInfo"></div>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
