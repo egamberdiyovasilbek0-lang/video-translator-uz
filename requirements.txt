@@ -1,0 +1,7 @@
+flask
+gunicorn
+requests
+yt-dlp
+edge-tts
+deep-translator
+google-auth
